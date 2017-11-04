@@ -93,34 +93,34 @@
         <schemas class="org.mule.common.metadata.StringBasedSchemaProvider">
           <schemas>
             <string>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;xs:schema xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:soap=&quot;http://schemas.xmlsoap.org/wsdl/soap/&quot; xmlns:tns=&quot;http://local.topdanmark.dk/DocDistribution/&quot; xmlns:wsdl=&quot;http://schemas.xmlsoap.org/wsdl/&quot; targetNamespace=&quot;http://local.topdanmark.dk/DocDistribution/&quot;&gt;
-      &lt;xs:element name=&quot;distribution_request&quot;&gt;
-        &lt;xs:complexType&gt;
-          &lt;xs:sequence&gt;
-            &lt;xs:element name=&quot;customerId&quot; type=&quot;xs:int&quot;/&gt;
-            &lt;xs:element name=&quot;name&quot; type=&quot;xs:string&quot;/&gt;
-            &lt;xs:element name=&quot;street_1&quot; type=&quot;xs:string&quot;/&gt;
-            &lt;xs:element name=&quot;street_2&quot; type=&quot;xs:string&quot;/&gt;
-            &lt;xs:element name=&quot;zipcode&quot; type=&quot;xs:int&quot;/&gt;
-            &lt;xs:element name=&quot;city&quot; type=&quot;xs:string&quot;/&gt;
-            &lt;xs:element name=&quot;country&quot; type=&quot;xs:string&quot;/&gt;
-            &lt;xs:element name=&quot;policynumber&quot; type=&quot;xs:int&quot;/&gt;
-            &lt;xs:element name=&quot;policytype&quot; type=&quot;xs:string&quot;/&gt;
-            &lt;xs:element name=&quot;price&quot; type=&quot;xs:string&quot;/&gt;
-          &lt;/xs:sequence&gt;
-        &lt;/xs:complexType&gt;
-      &lt;/xs:element&gt;
-      &lt;xs:element name=&quot;distribution_report&quot;&gt;
-        &lt;xs:complexType&gt;
-          &lt;xs:sequence&gt;
-            &lt;xs:element name=&quot;status&quot; type=&quot;xs:int&quot;/&gt;
-            &lt;xs:element name=&quot;message&quot; type=&quot;xs:string&quot;/&gt;
-          &lt;/xs:sequence&gt;
-        &lt;/xs:complexType&gt;
-      &lt;/xs:element&gt;
-    &lt;/xs:schema&gt;</string>
+			&lt;xs:element name=&quot;distribution_request&quot;&gt;
+				&lt;xs:complexType&gt;
+					&lt;xs:sequence&gt;
+						&lt;xs:element name=&quot;customerId&quot; type=&quot;xs:int&quot;/&gt;
+						&lt;xs:element name=&quot;name&quot; type=&quot;xs:string&quot;/&gt;
+						&lt;xs:element name=&quot;street_1&quot; type=&quot;xs:string&quot;/&gt;
+						&lt;xs:element name=&quot;street_2&quot; type=&quot;xs:string&quot;/&gt;
+						&lt;xs:element name=&quot;zipcode&quot; type=&quot;xs:int&quot;/&gt;
+						&lt;xs:element name=&quot;city&quot; type=&quot;xs:string&quot;/&gt;
+						&lt;xs:element name=&quot;country&quot; type=&quot;xs:string&quot;/&gt;
+						&lt;xs:element name=&quot;policynumber&quot; type=&quot;xs:int&quot;/&gt;
+						&lt;xs:element name=&quot;policytype&quot; type=&quot;xs:string&quot;/&gt;
+						&lt;xs:element name=&quot;price&quot; type=&quot;xs:string&quot;/&gt;
+					&lt;/xs:sequence&gt;
+				&lt;/xs:complexType&gt;
+			&lt;/xs:element&gt;
+			&lt;xs:element name=&quot;distribution_report&quot;&gt;
+				&lt;xs:complexType&gt;
+					&lt;xs:sequence&gt;
+						&lt;xs:element name=&quot;status&quot; type=&quot;xs:int&quot;/&gt;
+						&lt;xs:element name=&quot;message&quot; type=&quot;xs:string&quot;/&gt;
+					&lt;/xs:sequence&gt;
+				&lt;/xs:complexType&gt;
+			&lt;/xs:element&gt;
+		&lt;/xs:schema&gt;</string>
           </schemas>
           <encoding>UTF-8</encoding>
-          <baseUri>http://localhost:8088/mockDocumentDistributionSOAP?wsdl</baseUri>
+          <baseUri>file:/Users/arjunkumar/git-personal/challenge-assignment/challenge/src/main/wsdl/document-distribution.wsdl</baseUri>
         </schemas>
         <namespaceManager>
           <namespacePrefix class="tree-map">
@@ -416,34 +416,34 @@
         <schemas class="org.mule.common.metadata.StringBasedSchemaProvider">
           <schemas>
             <string>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;xs:schema xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:soap=&quot;http://schemas.xmlsoap.org/wsdl/soap/&quot; xmlns:tns=&quot;http://local.topdanmark.dk/DocDistribution/&quot; xmlns:wsdl=&quot;http://schemas.xmlsoap.org/wsdl/&quot; targetNamespace=&quot;http://local.topdanmark.dk/DocDistribution/&quot;&gt;
-      &lt;xs:element name=&quot;distribution_request&quot;&gt;
-        &lt;xs:complexType&gt;
-          &lt;xs:sequence&gt;
-            &lt;xs:element name=&quot;customerId&quot; type=&quot;xs:int&quot;/&gt;
-            &lt;xs:element name=&quot;name&quot; type=&quot;xs:string&quot;/&gt;
-            &lt;xs:element name=&quot;street_1&quot; type=&quot;xs:string&quot;/&gt;
-            &lt;xs:element name=&quot;street_2&quot; type=&quot;xs:string&quot;/&gt;
-            &lt;xs:element name=&quot;zipcode&quot; type=&quot;xs:int&quot;/&gt;
-            &lt;xs:element name=&quot;city&quot; type=&quot;xs:string&quot;/&gt;
-            &lt;xs:element name=&quot;country&quot; type=&quot;xs:string&quot;/&gt;
-            &lt;xs:element name=&quot;policynumber&quot; type=&quot;xs:int&quot;/&gt;
-            &lt;xs:element name=&quot;policytype&quot; type=&quot;xs:string&quot;/&gt;
-            &lt;xs:element name=&quot;price&quot; type=&quot;xs:string&quot;/&gt;
-          &lt;/xs:sequence&gt;
-        &lt;/xs:complexType&gt;
-      &lt;/xs:element&gt;
-      &lt;xs:element name=&quot;distribution_report&quot;&gt;
-        &lt;xs:complexType&gt;
-          &lt;xs:sequence&gt;
-            &lt;xs:element name=&quot;status&quot; type=&quot;xs:int&quot;/&gt;
-            &lt;xs:element name=&quot;message&quot; type=&quot;xs:string&quot;/&gt;
-          &lt;/xs:sequence&gt;
-        &lt;/xs:complexType&gt;
-      &lt;/xs:element&gt;
-    &lt;/xs:schema&gt;</string>
+			&lt;xs:element name=&quot;distribution_request&quot;&gt;
+				&lt;xs:complexType&gt;
+					&lt;xs:sequence&gt;
+						&lt;xs:element name=&quot;customerId&quot; type=&quot;xs:int&quot;/&gt;
+						&lt;xs:element name=&quot;name&quot; type=&quot;xs:string&quot;/&gt;
+						&lt;xs:element name=&quot;street_1&quot; type=&quot;xs:string&quot;/&gt;
+						&lt;xs:element name=&quot;street_2&quot; type=&quot;xs:string&quot;/&gt;
+						&lt;xs:element name=&quot;zipcode&quot; type=&quot;xs:int&quot;/&gt;
+						&lt;xs:element name=&quot;city&quot; type=&quot;xs:string&quot;/&gt;
+						&lt;xs:element name=&quot;country&quot; type=&quot;xs:string&quot;/&gt;
+						&lt;xs:element name=&quot;policynumber&quot; type=&quot;xs:int&quot;/&gt;
+						&lt;xs:element name=&quot;policytype&quot; type=&quot;xs:string&quot;/&gt;
+						&lt;xs:element name=&quot;price&quot; type=&quot;xs:string&quot;/&gt;
+					&lt;/xs:sequence&gt;
+				&lt;/xs:complexType&gt;
+			&lt;/xs:element&gt;
+			&lt;xs:element name=&quot;distribution_report&quot;&gt;
+				&lt;xs:complexType&gt;
+					&lt;xs:sequence&gt;
+						&lt;xs:element name=&quot;status&quot; type=&quot;xs:int&quot;/&gt;
+						&lt;xs:element name=&quot;message&quot; type=&quot;xs:string&quot;/&gt;
+					&lt;/xs:sequence&gt;
+				&lt;/xs:complexType&gt;
+			&lt;/xs:element&gt;
+		&lt;/xs:schema&gt;</string>
           </schemas>
           <encoding reference="../../../../entry/org.mule.common.metadata.DefaultXmlMetaDataModel/schemas/encoding"/>
-          <baseUri>http://localhost:8088/mockDocumentDistributionSOAP?wsdl</baseUri>
+          <baseUri>file:/Users/arjunkumar/git-personal/challenge-assignment/challenge/src/main/wsdl/document-distribution.wsdl</baseUri>
         </schemas>
         <namespaceManager>
           <namespacePrefix class="tree-map">

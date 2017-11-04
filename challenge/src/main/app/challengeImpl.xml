@@ -17,7 +17,7 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
     <http:request-config name="PolicyAPI_HTTP_Request_Configuration" host="localhost" port="8082" basePath="/api" doc:name="HTTP Request Configuration">
         <http:raml-api-configuration location="policy.raml"/>
     </http:request-config>
-    <ws:consumer-config name="Web_Service_Consumer" service="DocumentDistribution" port="DocumentDistributionSOAP" serviceAddress="http://localhost:8088/mockDocumentDistributionSOAP" wsdlLocation="document-distribution.wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer" service="DocumentDistribution" port="DocumentDistributionSOAP" serviceAddress="http://localhost:8083/mockDocumentDistributionSOAP" wsdlLocation="document-distribution.wsdl" doc:name="Web Service Consumer"/>
     <flow name="challengeImpl_distributionRequestProcess">
         <set-variable variableName="errors" value="#[new java.util.ArrayList()]" doc:name="errors"/>
         <scatter-gather doc:name="Scatter-Gather">
@@ -85,6 +85,15 @@ for( java.lang.Object obj : payload){
 	message: payload.ns0#distribution_report.message
 }]]></dw:set-payload>
         </dw:transform-message>
+        <choice-exception-strategy doc:name="Choice Exception Strategy">
+            <catch-exception-strategy when="exception.causedBy(java.net.ConnectException)" doc:name="java.net.ConnectException">
+                <logger message="DocumentsitributionService is down" level="INFO" doc:name="Logger"/>
+                <scripting:component doc:name="addErrorInfo">
+                    <scripting:script engine="Groovy"><![CDATA[flowVars.errors.add(new dk.topdanmark.error.ErrorInfo("ERR500","","DOCUMENT_DISTRIBUTION"))]]></scripting:script>
+                </scripting:component>
+                <flow-ref name="preapreAndSendErrorMessage" doc:name="preapreAndSendErrorMessage"/>
+            </catch-exception-strategy>
+        </choice-exception-strategy>
         
     </flow>
     <flow name="preapreAndSendErrorMessage">
