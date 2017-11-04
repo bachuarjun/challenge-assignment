@@ -15,7 +15,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <apikit:console config-ref="challenge-config" doc:name="APIkit Console" />
     </flow>
     <flow name="post:/challenge:challenge-config">
-        <set-payload value="{&quot;message&quot;:&quot;Your request is processed succeesfully&quot;}" doc:name="Set Payload"/>
+        <flow-ref name="challengeImpl_distributionRequestProcess" doc:name="challengeImpl_distributionRequestProcess"/>
     </flow>
     <apikit:mapping-exception-strategy name="challenge-apiKitGlobalExceptionMapping">
         <apikit:mapping statusCode="404">
