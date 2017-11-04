@@ -1,0 +1,22 @@
+{
+	"title": "customer details",
+	"type": "object",
+	"properties": {
+		"policy": {
+			"type": "string"
+		},
+		"type": {
+			"type": "string"
+		},
+		"active_from": {
+			"type": "string"
+		},
+		"premium": {
+			"type": "number"
+		},
+		"currency": {
+			"type": "string"
+		}
+	},
+	"required": ["policy", "type","active_from","premium","currency"]
+}
