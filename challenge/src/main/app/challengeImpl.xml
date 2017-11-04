@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
@@ -9,19 +9,55 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
 http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
 http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
-http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd">
     <jms:activemq-connector name="CustomerService_Active_MQ_Configuration" brokerURL="tcp://localhost:61616" validateConnections="true" doc:name="Active MQ"/>
     <http:request-config name="PolicyAPI_HTTP_Request_Configuration" host="localhost" port="8082" basePath="/api" doc:name="HTTP Request Configuration">
         <http:raml-api-configuration location="policy.raml"/>
     </http:request-config>
     <flow name="challengeImpl_distributionRequestProcess">
+        <set-variable variableName="errors" value="#[new java.util.ArrayList()]" doc:name="errors"/>
         <scatter-gather doc:name="Scatter-Gather">
             <flow-ref name="getCustomerDetails" doc:name="getCustomerDetails"/>
             <flow-ref name="getPolicyDetails" doc:name="getPolicyDetails"/>
         </scatter-gather>
-        <logger level="INFO" doc:name="Logger"/>
-        <expression-filter expression="#[payload.contains(com.topdanmark.error.ErrorInfo)]" doc:name="Expression"/>
+        <scripting:component doc:name="seggregateErrorsAnd">
+            <scripting:script engine="Groovy"><![CDATA[import dk.topdanmark.error.ErrorInfo;
+import dk.topdanmark.pojo.Customer;
+import dk.topdanmark.pojo.Policy;
+
+for( java.lang.Object obj : payload){
+	if(obj instanceof ErrorInfo){
+		flowVars.errors.add(obj)
+	}
+	if(obj instanceof Customer){
+		flowVars.customerDetails = obj;
+	}
+	
+	if(obj instanceof Policy){
+		flowVars.policyDetails = obj;
+	}
+	
+	
+}
+]]></scripting:script>
+        </scripting:component>
+        <message-filter onUnaccepted="preapreAndSendErrorMessage" doc:name="filterIfErrors">
+            <expression-filter expression="#[flowVars['errors'].size() == 0]"/>
+        </message-filter>
         
+    </flow>
+    <flow name="preapreAndSendErrorMessage">
+        <scripting:component doc:name="prepareerrorMessage">
+            <scripting:script engine="Groovy"><![CDATA[import java.util.LinkedHashMap;
+LinkedHashMap errorMessage = new LinkedHashMap();
+errorMessage.put("errorDescription","one or more dependancies are failed");
+errorMessage.put("errors",flowVars.errors);
+payload = errorMessage;]]></scripting:script>
+        </scripting:component>
+        <set-property propertyName="http.status" value="518" doc:name="httpStatus424"/>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
     </flow>
     <flow name="getPolicyDetails">
         <logger message="@todo Implemet for policy service rest API call" level="INFO" doc:name="Logger"/>
