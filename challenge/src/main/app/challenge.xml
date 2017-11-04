@@ -16,6 +16,10 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     </flow>
     <flow name="post:/challenge:challenge-config">
         <byte-array-to-string-transformer doc:name="Byte Array to String"/>
+        <message-properties-transformer scope="invocation" doc:name="extractRequiredVariables">
+            <add-message-property key="policyId" value="#[json:policyId]"/>
+            <add-message-property key="customerId" value="#[json:customerId]"/>
+        </message-properties-transformer>
         <flow-ref name="challengeImpl_distributionRequestProcess" doc:name="challengeImpl_distributionRequestProcess"/>
         <logger level="INFO" doc:name="Logger"/>
     </flow>

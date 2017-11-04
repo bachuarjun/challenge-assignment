@@ -1,0 +1,25 @@
+{
+    "inputMessageMetadata": {
+        "flowVariables": {
+            "policyId": {
+                "connectorName": "#_custom_mule_metadata_type_#",
+                "typeId": "policyId"
+            },
+            "customerId": {
+                "connectorName": "#_custom_mule_metadata_type_#",
+                "typeId": "customerId"
+            },
+            "policyDetails": {
+                "connectorName": "#_custom_mule_metadata_type_#",
+                "typeId": "policyDetails"
+            },
+            "customerDetails": {
+                "connectorName": "#_custom_mule_metadata_type_#",
+                "typeId": "customerDetails"
+            }
+        }
+    },
+    "outputMessageMetadata": {},
+    "id": "19a49035-2251-40de-a2ce-034f7b867ebc",
+    "version": "5.2.0.0"
+}

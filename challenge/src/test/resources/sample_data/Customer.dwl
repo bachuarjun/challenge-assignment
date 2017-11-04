@@ -1,0 +1,13 @@
+%dw 1.0
+%output application/java
+---
+{
+	city: "????",
+	country: "????",
+	name: "????",
+	street_1: "????",
+	street_2: "????",
+	zipcode: 1
+} as :object {
+	class : "dk.topdanmark.pojo.Customer"
+}
