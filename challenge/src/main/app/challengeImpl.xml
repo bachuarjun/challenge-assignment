@@ -15,8 +15,12 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
         <http:raml-api-configuration location="policy.raml"/>
     </http:request-config>
     <flow name="challengeImpl_distributionRequestProcess">
-        <flow-ref name="getCustomerDetails" doc:name="getCustomerDetails"/>
-        <flow-ref name="getPolicyDetails" doc:name="getPolicyDetails"/>
+        <scatter-gather doc:name="Scatter-Gather">
+            <flow-ref name="getCustomerDetails" doc:name="getCustomerDetails"/>
+            <flow-ref name="getPolicyDetails" doc:name="getPolicyDetails"/>
+        </scatter-gather>
+        <logger level="INFO" doc:name="Logger"/>
+        <expression-filter expression="#[payload.contains(com.topdanmark.error.ErrorInfo)]" doc:name="Expression"/>
         
     </flow>
     <flow name="getPolicyDetails">
@@ -33,11 +37,11 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
         <choice-exception-strategy doc:name="Choice Exception Strategy">
             <catch-exception-strategy when="#[exception.causedBy(java.net.ConnectException)]" doc:name="java.net.ConnectException">
                 <logger message=" Policy Service API is down at the moment " level="ERROR" doc:name="Logger"/>
-                <set-payload value="{&quot;error&quot;:&quot;Policy Service API is dow at the moment&quot;}" doc:name="Set Payload"/>
+                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR500&quot;,&quot;&quot;,&quot;POLICY&quot;)]" doc:name="Set Payload" mimeType="application/java"/>
             </catch-exception-strategy>
             <catch-exception-strategy when="#[exception.causedBy(org.mule.module.json.validation.JsonSchemaValidationException)]" doc:name="Catch Exception Strategy">
                 <logger message="Error Invalid content was recieved discarding message" level="INFO" doc:name="Logger"/>
-                <set-payload value="{&quot;error&quot;:&quot;Invalid content&quot;}" doc:name="Set Payload"/>
+                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR400&quot;,&quot;&quot;,&quot;POLICY&quot;)]" doc:name="Set Payload" mimeType="application/java"/>
             </catch-exception-strategy>
         </choice-exception-strategy>
     </flow>
@@ -53,11 +57,11 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
         <choice-exception-strategy doc:name="Choice Exception Strategy">
             <catch-exception-strategy when="#[exception.causedBy(org.mule.api.routing.ResponseTimeoutException)]" doc:name="org.mule.api.routing.ResponseTimeoutException">
                 <logger message=" Customer Service not responsed within given time " level="ERROR" doc:name="Logger"/>
-                <set-payload value="{&quot;error&quot;:&quot;errorr customer service is down...&quot;}" doc:name="Set Payload"/>
+                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR500&quot;,&quot;&quot;,&quot;CRM&quot;)]" doc:name="Set Payload" mimeType="application/java"/>
             </catch-exception-strategy>
             <catch-exception-strategy when="#[exception.causedBy(org.mule.module.json.validation.JsonSchemaValidationException)]" doc:name="Catch Exception Strategy">
                 <logger message="Error Invalid content was recieved discarding message" level="INFO" doc:name="Logger"/>
-                <set-payload value="{&quot;error&quot;:&quot;Invalid content&quot;}" doc:name="Set Payload"/>
+                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR400&quot;,&quot;&quot;,&quot;CRM&quot;)]" doc:name="Set Payload" mimeType="application/java"/>
             </catch-exception-strategy>
         </choice-exception-strategy>
     </flow>

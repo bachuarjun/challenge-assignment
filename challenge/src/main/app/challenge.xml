@@ -15,7 +15,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <apikit:console config-ref="challenge-config" doc:name="APIkit Console" />
     </flow>
     <flow name="post:/challenge:challenge-config">
+        <byte-array-to-string-transformer doc:name="Byte Array to String"/>
         <flow-ref name="challengeImpl_distributionRequestProcess" doc:name="challengeImpl_distributionRequestProcess"/>
+        <logger level="INFO" doc:name="Logger"/>
     </flow>
     <apikit:mapping-exception-strategy name="challenge-apiKitGlobalExceptionMapping">
         <apikit:mapping statusCode="404">
