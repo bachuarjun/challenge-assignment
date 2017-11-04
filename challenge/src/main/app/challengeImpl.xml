@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+    <jms:activemq-connector name="CustomerService_Active_MQ_Configuration" brokerURL="tcp://localhost:61616" validateConnections="true" doc:name="Active MQ"/>
+    <flow name="challengeImpl_distributionRequestProcess">
+        <flow-ref name="getCustomerDetails" doc:name="getCustomerDetails"/>
+        
+    </flow>
+    <flow name="getPolicyDetails">
+        <logger message="@todo Implemet for policy service rest API call" level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="getCustomerDetails">
+        <byte-array-to-string-transformer doc:name="Byte Array to String"/>
+        <request-reply timeout="1000" doc:name="Request-Reply">
+            <jms:outbound-endpoint exchange-pattern="request-response" queue="customer_req" connector-ref="CustomerService_Active_MQ_Configuration" doc:name="RequestCustomerDetails"/>
+            <jms:inbound-endpoint exchange-pattern="request-response" queue="customer_resp" connector-ref="CustomerService_Active_MQ_Configuration" doc:name="RecieveCustomerDetails"/>
+        </request-reply>
+        <json:validate-schema schemaLocation="customer-details.schema" doc:name="Validate JSON Schema"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+        <choice-exception-strategy doc:name="Choice Exception Strategy">
+            <catch-exception-strategy when="#[exception.causedBy(org.mule.api.routing.ResponseTimeoutException)]" doc:name="org.mule.api.routing.ResponseTimeoutException">
+                <logger message=" Customer Service not responsed within given time " level="ERROR" doc:name="Logger"/>
+                <set-payload value="{&quot;error&quot;:&quot;errorr customer service is down...&quot;}" doc:name="Set Payload"/>
+            </catch-exception-strategy>
+            <catch-exception-strategy when="#[exception.causedBy(org.mule.module.json.validation.JsonSchemaValidationException)]" doc:name="Catch Exception Strategy">
+                <logger message="Error Invalid content was recieved discarding message" level="INFO" doc:name="Logger"/>
+                <set-payload value="{&quot;error&quot;:&quot;Invalid content&quot;}" doc:name="Set Payload"/>
+            </catch-exception-strategy>
+        </choice-exception-strategy>
+    </flow>
+</mule>

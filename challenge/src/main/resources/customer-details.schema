@@ -1,0 +1,25 @@
+{
+	"title": "customer details",
+	"type": "object",
+	"properties": {
+		"name": {
+			"type": "string"
+		},
+		"street_1": {
+			"type": "string"
+		},
+		"street_2": {
+			"type": "string"
+		},
+		"zipcode": {
+			"type": "number"
+		},
+		"city": {
+			"type": "string"
+		},
+		"country": {
+			"type": "string"
+		}
+	},
+	"required": ["name", "street_1","street_2","zipcode","city","country"]
+}
