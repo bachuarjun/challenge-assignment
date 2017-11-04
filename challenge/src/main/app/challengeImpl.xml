@@ -11,7 +11,7 @@ http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/jso
 http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
     <jms:activemq-connector name="CustomerService_Active_MQ_Configuration" brokerURL="tcp://localhost:61616" validateConnections="true" doc:name="Active MQ"/>
-    <http:request-config name="PolicyAPI_HTTP_Request_Configuration" host="localhost" port="8082" basePath="/service" doc:name="HTTP Request Configuration">
+    <http:request-config name="PolicyAPI_HTTP_Request_Configuration" host="localhost" port="8082" basePath="/api" doc:name="HTTP Request Configuration">
         <http:raml-api-configuration location="policy.raml"/>
     </http:request-config>
     <flow name="challengeImpl_distributionRequestProcess">
