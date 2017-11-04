@@ -29,8 +29,9 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
         <byte-array-to-string-transformer doc:name="Byte Array to String"/>
         <json:validate-schema schemaLocation="policy-details.schema" doc:name="validatePolicyInfoJSONSchema"/>
         <logger message="Policiy API Response :  #[payload]" level="INFO" doc:name="Logger"/>
+        <json:json-to-object-transformer returnClass="dk.topdanmark.pojo.Policy" mimeType="application/java" doc:name="JSONToPolicy"/>
         <choice-exception-strategy doc:name="Choice Exception Strategy">
-            <catch-exception-strategy when="#[exception.causedBy(java.net.ConnectException)]" doc:name="org.mule.api.routing.ResponseTimeoutException">
+            <catch-exception-strategy when="#[exception.causedBy(java.net.ConnectException)]" doc:name="java.net.ConnectException">
                 <logger message=" Policy Service API is down at the moment " level="ERROR" doc:name="Logger"/>
                 <set-payload value="{&quot;error&quot;:&quot;Policy Service API is dow at the moment&quot;}" doc:name="Set Payload"/>
             </catch-exception-strategy>
@@ -48,6 +49,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
         </request-reply>
         <json:validate-schema schemaLocation="customer-details.schema" doc:name="Validate JSON Schema"/>
         <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+        <json:json-to-object-transformer returnClass="dk.topdanmark.pojo.Customer" doc:name="JSONToCustomer"/>
         <choice-exception-strategy doc:name="Choice Exception Strategy">
             <catch-exception-strategy when="#[exception.causedBy(org.mule.api.routing.ResponseTimeoutException)]" doc:name="org.mule.api.routing.ResponseTimeoutException">
                 <logger message=" Customer Service not responsed within given time " level="ERROR" doc:name="Logger"/>
