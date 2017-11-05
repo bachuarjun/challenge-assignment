@@ -69,7 +69,7 @@ for( java.lang.Object obj : payload){
 	}
 }]]></dw:set-payload>
         </dw:transform-message>
-        <logger message=" sendingg     payload  #[payload]" level="INFO" doc:name="Logger"/>
+        <logger message=" sending document distribution webservice  request and the payload is :   #[payload]" level="INFO" doc:name="Logger"/>
         <ws:consumer config-ref="DocumentDistributionService" operation="sendDocument" doc:name="sendDocument"/>
         <dw:transform-message doc:name="distribution_report_to_response" metadata:id="4d656148-f320-4c53-93fe-ab93336872fc">
             <dw:set-payload><![CDATA[%dw 1.0
@@ -104,24 +104,24 @@ payload = errorMessage;]]></scripting:script>
         <json:object-to-json-transformer doc:name="Object to JSON"/>
     </flow>
     <flow name="getPolicyDetails">
-        <logger message="@todo Implemet for policy service rest API call" level="INFO" doc:name="Logger"/>
+        <logger message="Sending request to get the policy details " level="INFO" doc:name="Logger"/>
         <http:request config-ref="PolicyAPI_HTTP_Request_Configuration" path="/policy/{policyId}" method="GET" doc:name="requestForPolicyDetails">
             <http:request-builder>
                 <http:uri-param paramName="policyId" value="#['123456789']"/>
             </http:request-builder>
         </http:request>
         <byte-array-to-string-transformer doc:name="Byte Array to String"/>
+        <logger message="Policiy API Responsded with HTTP Status #[message.inboundProperties['http.status']]  and response Body is  :  #[payload]" level="INFO" doc:name="Logger"/>
         <json:validate-schema schemaLocation="policy-details.schema" doc:name="validatePolicyInfoJSONSchema"/>
-        <logger message="Policiy API Response :  #[payload]" level="INFO" doc:name="Logger"/>
         <json:json-to-object-transformer returnClass="dk.topdanmark.pojo.Policy" mimeType="application/java" doc:name="JSONToPolicy"/>
         <choice-exception-strategy doc:name="Choice Exception Strategy">
             <catch-exception-strategy when="#[exception.causedBy(java.net.ConnectException)]" doc:name="java.net.ConnectException">
                 <logger message=" Policy Service API is down at the moment " level="ERROR" doc:name="Logger"/>
-                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR500&quot;,&quot;&quot;,&quot;POLICY&quot;)]" doc:name="Set Payload" mimeType="application/java"/>
+                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR500&quot;,&quot;Policy Service API is down at the moment &quot;,&quot;POLICY&quot;)]" doc:name="Set Payload" mimeType="application/java"/>
             </catch-exception-strategy>
             <catch-exception-strategy when="#[exception.causedBy(org.mule.module.json.validation.JsonSchemaValidationException)]" doc:name="Catch Exception Strategy">
                 <logger message="Error Invalid content was recieved discarding message" level="INFO" doc:name="Logger"/>
-                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR400&quot;,&quot;&quot;,&quot;POLICY&quot;)]" doc:name="Set Payload" mimeType="application/java"/>
+                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR400&quot;,&quot;Error Invalid content was recieved&quot;,&quot;POLICY&quot;)]" doc:name="Set Payload" mimeType="application/java"/>
             </catch-exception-strategy>
         </choice-exception-strategy>
     </flow>
@@ -133,8 +133,8 @@ payload = errorMessage;]]></scripting:script>
             <jms:inbound-endpoint  queue="${crm.getCustomerDetails.responseQueue}" connector-ref="CustomerService_Active_MQ_Configuration" doc:name="RecieveCustomerDetails" >
             </jms:inbound-endpoint>
         </request-reply>
+        <logger message="Got the reply from customer service queue_resp  and response is #[payload]" level="INFO" doc:name="Logger"/>
         <json:validate-schema schemaLocation="customer-details.schema" doc:name="Validate JSON Schema"/>
-        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
         <json:json-to-object-transformer returnClass="dk.topdanmark.pojo.Customer" doc:name="JSONToCustomer"/>
         <choice-exception-strategy doc:name="Choice Exception Strategy">
             
@@ -142,12 +142,12 @@ payload = errorMessage;]]></scripting:script>
                 <logger message="Customer details redelivered so skipping" level="INFO" doc:name="Logger"/>
             </catch-exception-strategy>
             <catch-exception-strategy when="#[exception.causedBy(org.mule.api.routing.ResponseTimeoutException)]" doc:name="org.mule.api.routing.ResponseTimeoutException">
-                <logger message=" Customer Service not responsed within given time " level="ERROR" doc:name="Logger"/>
-                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR500&quot;,&quot;&quot;,&quot;CRM&quot;)]" doc:name="Set Payload" mimeType="application/java"/>
+                <logger message=" Customer Service not responsed within  time " level="ERROR" doc:name="Logger"/>
+                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR500&quot;,&quot;Customer Service not responsed within  time &quot;,&quot;CRM&quot;)]" doc:name="Set Payload" mimeType="application/java"/>
             </catch-exception-strategy>
             <catch-exception-strategy when="#[exception.causedBy(org.mule.module.json.validation.JsonSchemaValidationException)]" doc:name="Catch Exception Strategy">
                 <logger message="Error Invalid content was recieved discarding message" level="INFO" doc:name="Logger"/>
-                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR400&quot;,&quot;&quot;,&quot;CRM&quot;)]" doc:name="Set Payload" mimeType="application/java"/>
+                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR400&quot;,&quot;Error Invalid content was recieved&quot;,&quot;CRM&quot;)]" doc:name="Set Payload" mimeType="application/java"/>
             </catch-exception-strategy>
         </choice-exception-strategy>
     </flow>
