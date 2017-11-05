@@ -13,18 +13,14 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
 http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
 http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
-    <jms:activemq-connector name="CustomerService_Active_MQ_Configuration" brokerURL="tcp://localhost:61616" validateConnections="true" doc:name="Active MQ"/>
-    <http:request-config name="PolicyAPI_HTTP_Request_Configuration" host="localhost" port="8082" basePath="/api" doc:name="HTTP Request Configuration">
-        <http:raml-api-configuration location="policy.raml"/>
-    </http:request-config>
-    <ws:consumer-config name="Web_Service_Consumer" service="DocumentDistribution" port="DocumentDistributionSOAP" serviceAddress="http://localhost:8083/mockDocumentDistributionSOAP" wsdlLocation="document-distribution.wsdl" doc:name="Web Service Consumer"/>
+    
     <flow name="challengeImpl_distributionRequestProcess">
         <set-variable variableName="errors" value="#[new java.util.ArrayList()]" doc:name="errors"/>
         <scatter-gather doc:name="Scatter-Gather">
             <flow-ref name="getCustomerDetails" doc:name="getCustomerDetails"/>
             <flow-ref name="getPolicyDetails" doc:name="getPolicyDetails"/>
         </scatter-gather>
-        <scripting:component doc:name="seggregateErrorsAnd">
+        <scripting:component doc:name="seggregateErrorsAndResponses">
             <scripting:script engine="Groovy"><![CDATA[import dk.topdanmark.error.ErrorInfo;
 import dk.topdanmark.pojo.Customer;
 import dk.topdanmark.pojo.Policy;
@@ -74,7 +70,7 @@ for( java.lang.Object obj : payload){
 }]]></dw:set-payload>
         </dw:transform-message>
         <logger message=" sendingg     payload  #[payload]" level="INFO" doc:name="Logger"/>
-        <ws:consumer config-ref="Web_Service_Consumer" operation="sendDocument" doc:name="Web Service Consumer"/>
+        <ws:consumer config-ref="DocumentDistribution_Service_Consumer" operation="sendDocument" doc:name="sendDocument"/>
         <dw:transform-message doc:name="distribution_report_to_response" metadata:id="4d656148-f320-4c53-93fe-ab93336872fc">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
