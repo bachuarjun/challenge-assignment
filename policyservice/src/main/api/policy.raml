@@ -1,0 +1,33 @@
+#%RAML 0.8
+title: PolicyService
+version: 1.0
+baseUri: https://local.topdanmark.dk/service
+/policy/{policyId}:
+  uriParameters: 
+    policyId: 
+      example: 7837346375483
+      required: true
+  get:      
+    description: Retrieve policy based on policy id provided
+    responses:
+      200:
+        body:
+          application/json:              
+            example: |
+              { 
+                "policy": "123123123",
+                "type": "car insurance",
+                "active_from": "2017-01.01",
+                "premium": 5000,
+                "currency": "USD"
+              }
+      404:
+        body:
+          application/json:
+            example: |
+              { "message" : "Resource not found Insurance Nbr - '9483990275'"}
+      500:
+        body:
+          application/json:
+            example: |
+              { "message" : "Internal Server Error "}

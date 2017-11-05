@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    <jms:activemq-connector name="Active_MQ" brokerURL="tcp://localhost:61616" validateConnections="true" doc:name="Active MQ"/>
+    <flow name="custserviceFlow">
+        <jms:inbound-endpoint queue="customer_req" connector-ref="Active_MQ" doc:name="JMS"/>
+        <choice doc:name="Choice">
+            <when expression="#[if (Math.random() &gt; 0.2) return true;]">
+                <set-payload value="#[
+	'{&quot;name&quot;: &quot;John Doe&quot;,
+	&quot;street_1&quot;: &quot;Main street&quot;,
+	&quot;street_2&quot;: &quot;&quot;,
+	&quot;zipcode&quot;: 55667,
+	&quot;city&quot;: &quot;Stoneville&quot;,
+	&quot;country&quot;: &quot;Denmark &quot;
+}']" doc:name="Set Payload"/>
+                <jms:outbound-endpoint queue="customer_resp" connector-ref="Active_MQ" doc:name="JMS"/>
+            </when>
+            <otherwise>
+                <logger message="&quot;Do nothing - system is down...&quot;" level="INFO" doc:name="Logger"/>
+            </otherwise>
+        </choice>
+    </flow>
+</mule>
