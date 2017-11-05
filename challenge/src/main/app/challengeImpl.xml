@@ -85,22 +85,48 @@ for( java.lang.Object obj : payload){
             <catch-exception-strategy when="exception.causedBy(java.net.ConnectException)" doc:name="java.net.ConnectException">
                 <logger message="DocumentsitributionService is down" level="INFO" doc:name="Logger"/>
                 <scripting:component doc:name="addErrorInfo">
-                    <scripting:script engine="Groovy"><![CDATA[flowVars.errors.add(new dk.topdanmark.error.ErrorInfo("ERR500","","DOCUMENT_DISTRIBUTION"))]]></scripting:script>
+                    <scripting:script engine="Groovy"><![CDATA[flowVars.errors.add(new dk.topdanmark.error.ErrorInfo("ERR500","DocumentDistribution Service is down","DOCUMENT_DISTRIBUTION"))]]></scripting:script>
                 </scripting:component>
                 <flow-ref name="preapreAndSendErrorMessage" doc:name="preapreAndSendErrorMessage"/>
             </catch-exception-strategy>
+            <catch-exception-strategy doc:name="SoapFaultException" when="#[exception.causedBy(org.mule.module.ws.consumer.SoapFaultException)]">
+                 <logger message="DocumentsitributionService responded with SOAP Fault" level="INFO" doc:name="Logger"/>
+                <scripting:component doc:name="addErrorInfo">
+                    <scripting:script engine="Groovy"><![CDATA[flowVars.errors.add(new dk.topdanmark.error.ErrorInfo("ERR400","SOAP Fault occured","DOCUMENT_DISTRIBUTION"))]]></scripting:script>
+                </scripting:component>
+                <flow-ref name="preapreAndSendErrorMessage" doc:name="preapreAndSendErrorMessage"/>
+             </catch-exception-strategy>
+            <exception-strategy ref="GeneralExceptionStrategy" doc:name="GeneralExceptionStrategy"/>
         </choice-exception-strategy>
         
     </flow>
+    <catch-exception-strategy name="GeneralExceptionStrategy" logException="false">
+        <logger message="Unexpected error" level="INFO" doc:name="Logger"/>
+        <scripting:component doc:name="addErrorInfo">
+            <scripting:script engine="Groovy"><![CDATA[flowVars.errors.add(new dk.topdanmark.error.ErrorInfo("ERR500","Unexpected error","API"))]]></scripting:script>
+        </scripting:component>
+        <flow-ref name="preapreAndSendErrorMessage" doc:name="preapreAndSendErrorMessage"/>
+    </catch-exception-strategy>
     <flow name="preapreAndSendErrorMessage">
         <scripting:component doc:name="prepareerrorMessage">
             <scripting:script engine="Groovy"><![CDATA[import java.util.LinkedHashMap;
+import dk.topdanmark.error.ErrorInfo;
+
 LinkedHashMap errorMessage = new LinkedHashMap();
 errorMessage.put("errorDescription","one or more dependancies are failed");
 errorMessage.put("errors",flowVars.errors);
+
+
+if(message.getOutboundProperty("http.status") == null){
+	if(flowVars.errors.size() == 1){
+		ErrorInfo errorInfo= flowVars.errors[0];
+		message.setOutboundProperty("http.status",errorInfo.getHttpStatusCode());
+	} else {
+		message.setOutboundProperty("http.status",424);
+	}
+}
 payload = errorMessage;]]></scripting:script>
         </scripting:component>
-        <set-property propertyName="http.status" value="518" doc:name="httpStatus424"/>
         <json:object-to-json-transformer doc:name="Object to JSON"/>
     </flow>
     <flow name="getPolicyDetails">
@@ -117,17 +143,18 @@ payload = errorMessage;]]></scripting:script>
         <choice-exception-strategy doc:name="Choice Exception Strategy">
             <catch-exception-strategy when="#[exception.causedBy(java.net.ConnectException)]" doc:name="java.net.ConnectException">
                 <logger message=" Policy Service API is down at the moment " level="ERROR" doc:name="Logger"/>
-                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR500&quot;,&quot;Policy Service API is down at the moment &quot;,&quot;POLICY&quot;)]" doc:name="Set Payload" mimeType="application/java"/>
+                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR500&quot;,&quot;Policy Service API is down at the moment &quot;,&quot;POLICY&quot;)]" doc:name="ErrorInfo" mimeType="application/java"/>
             </catch-exception-strategy>
-            <catch-exception-strategy when="#[exception.causedBy(org.mule.module.json.validation.JsonSchemaValidationException)]" doc:name="Catch Exception Strategy">
+            <catch-exception-strategy when="#[exception.causedBy(org.mule.module.json.validation.JsonSchemaValidationException)]" doc:name="JsonSchemaValidationException">
                 <logger message="Error Invalid content was recieved discarding message" level="INFO" doc:name="Logger"/>
-                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR400&quot;,&quot;Error Invalid content was recieved&quot;,&quot;POLICY&quot;)]" doc:name="Set Payload" mimeType="application/java"/>
+                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR424&quot;,&quot;Error Invalid content was recieved&quot;,&quot;POLICY&quot;)]" doc:name="ErrorInfo" mimeType="application/java"/>
             </catch-exception-strategy>
+            <exception-strategy ref="GeneralExceptionStrategy" doc:name="GeneralExceptionStrategy"/>
         </choice-exception-strategy>
     </flow>
     <flow name="getCustomerDetails">
         <byte-array-to-string-transformer doc:name="Byte Array to String"/>
-        <request-reply  doc:name="Request-Reply">
+        <request-reply  doc:name="Request-Reply" timeout="1000">
             <jms:outbound-endpoint  queue="${crm.getCustomerDetails.requestQueue}" connector-ref="CustomerService_Active_MQ_Configuration" doc:name="RequestCustomerDetails" >
             </jms:outbound-endpoint>
             <jms:inbound-endpoint  queue="${crm.getCustomerDetails.responseQueue}" connector-ref="CustomerService_Active_MQ_Configuration" doc:name="RecieveCustomerDetails" >
@@ -138,17 +165,19 @@ payload = errorMessage;]]></scripting:script>
         <json:json-to-object-transformer returnClass="dk.topdanmark.pojo.Customer" doc:name="JSONToCustomer"/>
         <choice-exception-strategy doc:name="Choice Exception Strategy">
             
-            <catch-exception-strategy when="#[exception.causedBy(org.mule.transport.jms.redelivery.MessageRedeliveredException)]" doc:name="MessageRedeliveredException">
+            <catch-exception-strategy when="#[exception.causedBy(org.mule.transport.jms.redelivery.MessageRedeliveredException)]" doc:name="MessageRedeliveredException" logException="false">
                 <logger message="Customer details redelivered so skipping" level="INFO" doc:name="Logger"/>
+                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR499&quot;,&quot;Customer data recieved  after the request is ended&quot;,&quot;CRM&quot;)]" mimeType="application/java" doc:name="ErrorInfo"/>
             </catch-exception-strategy>
             <catch-exception-strategy when="#[exception.causedBy(org.mule.api.routing.ResponseTimeoutException)]" doc:name="org.mule.api.routing.ResponseTimeoutException">
                 <logger message=" Customer Service not responsed within  time " level="ERROR" doc:name="Logger"/>
-                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR500&quot;,&quot;Customer Service not responsed within  time &quot;,&quot;CRM&quot;)]" doc:name="Set Payload" mimeType="application/java"/>
+                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR599&quot;,&quot;Customer Service not responsed within  time &quot;,&quot;CRM&quot;)]" doc:name="ErrorInfo" mimeType="application/java"/>
             </catch-exception-strategy>
-            <catch-exception-strategy when="#[exception.causedBy(org.mule.module.json.validation.JsonSchemaValidationException)]" doc:name="Catch Exception Strategy">
+            <catch-exception-strategy when="#[exception.causedBy(org.mule.module.json.validation.JsonSchemaValidationException)]" doc:name="JsonSchemaValidationException">
                 <logger message="Error Invalid content was recieved discarding message" level="INFO" doc:name="Logger"/>
-                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR400&quot;,&quot;Error Invalid content was recieved&quot;,&quot;CRM&quot;)]" doc:name="Set Payload" mimeType="application/java"/>
+                <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR424&quot;,&quot;Error Invalid content was recieved&quot;,&quot;CRM&quot;)]" doc:name="ErrorInfo" mimeType="application/java"/>
             </catch-exception-strategy>
+            <exception-strategy ref="GeneralExceptionStrategy" doc:name="GeneralExceptionStrategy"/>
         </choice-exception-strategy>
     </flow>
 </mule>

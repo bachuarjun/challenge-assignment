@@ -4,7 +4,21 @@ baseUri: http://local.inscale.com
 /challenge:
   post:
     body: 
-     application/json: 
+     application/json:
+      schema: |   
+            {
+                "title": "challenge request",
+                "type": "object",
+                "properties": {
+                  "customerId": {
+                    "type": "string"
+                  },
+                  "policyId": {
+                    "type": "string"
+                  }
+                 },
+                "required": [ "customerId","policyId"]
+              }
       example: | 
         {
           "customerId": "123123123",
@@ -16,7 +30,56 @@ baseUri: http://local.inscale.com
           application/json: 
             example: |
               {
-                "status":"",
-                "":""
+                "status": "1",
+                "message": "Success"
+              }
+      500:
+        body: 
+          application/json: 
+            example: |
+              {
+                "errorDescription": "one or more dependancies are failed",
+                "errors": [
+                      {
+                          "errorCode": "ERR500",
+                          "errorMessage": "DocumentDistribution Service is down",
+                          "systemID": "DOCUMENT_DISTRIBUTION"
+                      }
+                  ]
                }
+      599:
+        body: 
+          application/json: 
+            example: |
+              {
+                "errorDescription": "one or more dependancies are failed",
+                "errors": [
+                    {
+                        "errorCode": "ERR599",
+                        "errorMessage": "Customer Service not responsed within  time ",
+                        "systemID": "CRM"
+                    }
+                ]
+              }
+      424:
+        body: 
+          application/json: 
+            example: |
+              {
+                  "errorDescription": "one or more dependancies are failed",
+                  "errors": [
+                      {
+                          "errorCode": "ERR599",
+                          "errorMessage": "Customer Service not responsed within  time ",
+                          "systemID": "CRM"
+                      },
+                      {
+                          "errorCode": "ERR500",
+                          "errorMessage": "Policy Service API is down at the moment ",
+                          "systemID": "POLICY"
+                      }
+                  ]
+              }
+       
+     
        

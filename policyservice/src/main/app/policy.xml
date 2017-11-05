@@ -15,7 +15,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <apikit:console config-ref="policy-config" doc:name="APIkit Console"/>
     </flow>
     <flow name="get:/policy/{policyId}:policy-config">
-        <set-payload value="{ &#xA;  &quot;policy&quot;: &quot;123123123&quot;,&#xA;  &quot;type&quot;: &quot;car insurance&quot;,&#xA;  &quot;active_from&quot;: &quot;2017-01.01&quot;,&#xA;  &quot;premium&quot;: 5000,&#xA;  &quot;currency&quot;: &quot;USD&quot;&#xA;}" doc:name="Set Payload"/>
+        <set-payload value="{ 
+  &quot;policy&quot;: &quot;7362786328732872&quot;,
+  &quot;type&quot;: &quot;car insurance&quot;,
+  &quot;active_from&quot;: &quot;2017-01.01&quot;,
+  &quot;premium&quot;: 5000,
+  &quot;currency&quot;: &quot;USD&quot;
+}" doc:name="Set Payload"/>
     </flow>
     <apikit:mapping-exception-strategy name="policy-apiKitGlobalExceptionMapping">
         <apikit:mapping statusCode="404">
