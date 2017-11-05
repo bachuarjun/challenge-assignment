@@ -70,7 +70,7 @@ for( java.lang.Object obj : payload){
 }]]></dw:set-payload>
         </dw:transform-message>
         <logger message=" sendingg     payload  #[payload]" level="INFO" doc:name="Logger"/>
-        <ws:consumer config-ref="DocumentDistribution_Service_Consumer" operation="sendDocument" doc:name="sendDocument"/>
+        <ws:consumer config-ref="DocumentDistributionService" operation="sendDocument" doc:name="sendDocument"/>
         <dw:transform-message doc:name="distribution_report_to_response" metadata:id="4d656148-f320-4c53-93fe-ab93336872fc">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
@@ -127,14 +127,20 @@ payload = errorMessage;]]></scripting:script>
     </flow>
     <flow name="getCustomerDetails">
         <byte-array-to-string-transformer doc:name="Byte Array to String"/>
-        <request-reply timeout="1000" doc:name="Request-Reply">
-            <jms:outbound-endpoint  queue="customer_req" connector-ref="CustomerService_Active_MQ_Configuration" doc:name="RequestCustomerDetails"/>
-            <jms:inbound-endpoint  queue="customer_resp" connector-ref="CustomerService_Active_MQ_Configuration" doc:name="RecieveCustomerDetails"/>
+        <request-reply  doc:name="Request-Reply">
+            <jms:outbound-endpoint  queue="${crm.getCustomerDetails.requestQueue}" connector-ref="CustomerService_Active_MQ_Configuration" doc:name="RequestCustomerDetails" >
+            </jms:outbound-endpoint>
+            <jms:inbound-endpoint  queue="${crm.getCustomerDetails.responseQueue}" connector-ref="CustomerService_Active_MQ_Configuration" doc:name="RecieveCustomerDetails" >
+            </jms:inbound-endpoint>
         </request-reply>
         <json:validate-schema schemaLocation="customer-details.schema" doc:name="Validate JSON Schema"/>
         <logger message="#[payload]" level="INFO" doc:name="Logger"/>
         <json:json-to-object-transformer returnClass="dk.topdanmark.pojo.Customer" doc:name="JSONToCustomer"/>
         <choice-exception-strategy doc:name="Choice Exception Strategy">
+            
+            <catch-exception-strategy when="#[exception.causedBy(org.mule.transport.jms.redelivery.MessageRedeliveredException)]" doc:name="MessageRedeliveredException">
+                <logger message="Customer details redelivered so skipping" level="INFO" doc:name="Logger"/>
+            </catch-exception-strategy>
             <catch-exception-strategy when="#[exception.causedBy(org.mule.api.routing.ResponseTimeoutException)]" doc:name="org.mule.api.routing.ResponseTimeoutException">
                 <logger message=" Customer Service not responsed within given time " level="ERROR" doc:name="Logger"/>
                 <set-payload value="#[new dk.topdanmark.error.ErrorInfo(&quot;ERR500&quot;,&quot;&quot;,&quot;CRM&quot;)]" doc:name="Set Payload" mimeType="application/java"/>
